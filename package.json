@@ -1,0 +1,16 @@
+{
+  "name": "blogging_platform_api",
+  "version": "1.0.0",
+  "description": "A RESTful API platform for blogging, supporting user authentication, role-based access (user/admin), CRUD operations for posts, nested comments, and optional features like pagination, search, and admin dashboards.",
+  "license": "ISC",
+  "author": "Dhruvin Patel",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
+  }
+}
