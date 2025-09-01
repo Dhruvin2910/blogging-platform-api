@@ -1,6 +1,10 @@
 const UserModel = require("../Models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
+dotenv.config();
 
 
 const signup = async (req, res) => {
@@ -73,4 +77,63 @@ const login = async (req, res) => {
     }
 }
 
-module.exports = { signup, login }
+const forgotPassword = async (req, res) => {
+    try{
+        const { email } = req.body;
+        const user = await UserModel.findOne({ email });
+        if(!user){
+            return res.status(404).json({ success:false, message:"User not found" });
+        }
+
+        // Generate token
+        const token = crypto.randomBytes(20).toString("hex");
+        user.resetPasswordToken = token;
+        user.resetPasswordExpire = Date.now() + 15*60*1000; //15 min
+        await user.save();
+
+        // send mail
+        const resetURL = `${process.env.CLIENT_URL}/reset-password/${token}`;
+        const tranporter = nodemailer.createTransport({
+            service: "Gmail",
+            auth: { user:process.env.EMAIL_USER, pass:process.env.EMAIL_PASS }
+        });
+        await tranporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "Password Reset",
+            text: `Reset your password: ${resetURL}`
+        })
+
+        res.status(200).json({ success:true, message:"Password reset link sent to email" });
+    }catch(err){
+        console.error(err);
+        return res.status(500).json({ success:false, message:"Server error" });
+    }
+}
+
+const resetPassword = async (req, res) => {
+    try{
+        const { token } = req.cookies.resetToken;
+        const { newPassword } = req.body;
+
+        const user = await UserModel.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpire: { $gt: Date.now() }
+        });
+
+        if(!user){
+            return res.status(400).json({ success:false, message:"Invalie or expire token" });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+    }catch(err){
+        console.error(err);
+        return res.status(500).json({ success:false, message:"Server error" });
+    }
+}
+
+module.exports = { signup, login, forgotPassword, resetPassword };

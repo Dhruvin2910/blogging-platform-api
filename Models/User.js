@@ -10,6 +10,8 @@ const UserSchema = new Schema({
     bio:String,
     avatar: String,
     website: String, 
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
 }, { timestamps:true })
 
 const UserModel = mongoose.model("User", UserSchema);
