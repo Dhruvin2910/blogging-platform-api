@@ -23,7 +23,7 @@ const signup = async (req, res) => {
       });
     }
 
-    const userModel = new UserModel({ name, username, email, password });
+    const userModel = new UserModel({ name, username, email, password, role:"user" });
     userModel.password = await bcrypt.hash(password, 10);
     await userModel.save();
 
