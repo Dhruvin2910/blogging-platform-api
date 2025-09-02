@@ -3,6 +3,7 @@ const app = express();
 const dotenv = require("dotenv");
 const authRoute = require("./Routes/Auth");
 const userRoute = require("./Routes/User");
+const postRoute = require("./Routes/Post");
 const cookieParser = require("cookie-parser");
 const PORT = process.env.PORT || 8000;
 
@@ -24,6 +25,7 @@ app.listen(PORT, () => {
 //Routes
 app.use("/auth", authRoute);
 app.use("/user", userRoute);
+app.use("/post", postRoute);
 
 //for server testing
 app.get("/test", (req, res) => {
