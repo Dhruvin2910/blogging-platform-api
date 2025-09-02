@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const authRoute = require("./Routes/Auth");
 const userRoute = require("./Routes/User");
 const cookieParser = require("cookie-parser");
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 
 //Load exnvironment from variables files
 dotenv.config();
