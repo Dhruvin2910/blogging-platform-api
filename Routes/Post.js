@@ -8,10 +8,11 @@ const ensureAuthenticated = require("../Middleware/Auth");
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.post("/createPost", ensureAuthenticated, upload.single("coverImage"), createPost);
-router.get("/getPost/:slug", ensureAuthenticated, getPost);
-router.get("/getPosts", ensureAuthenticated, getAllPost);
-router.put("/updatePost/:slug", ensureAuthenticated, updatePost);
-router.delete("/deletePost/:slug", ensureAuthenticated, deletePost);
+// Protected routes
+router.post("/", ensureAuthenticated, upload.single("coverImage"), createPost);
+router.get("/:slug", ensureAuthenticated, getPost);
+router.get("/", ensureAuthenticated, getAllPost);
+router.put("/:slug", ensureAuthenticated, upload.single("coverImage"), updatePost);
+router.delete("/:slug", ensureAuthenticated, deletePost);
 
 module.exports = router;
