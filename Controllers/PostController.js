@@ -29,14 +29,17 @@ const createPost = async (req, res) => {
       };
 
       const result = await streamUpload();
-      coverImageUrl = result.secure_url;
+      coverImage = {
+        url: result.secure_url,
+        public_id: result.public_id,
+      };
     }
 
     const newPost = new PostModel({
       author: req.user.id,
       title,
       content,
-      coverImage: coverImageUrl,
+      coverImage,
       tags: tags
         ? tags
             .split(",")
@@ -73,7 +76,7 @@ const getPost = async (req, res) => {
     return res.status(200).json({ success: true, post });
   } catch (err) {
     console.error(err);
-    return res.status(500).jon({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -125,6 +128,11 @@ const updatePost = async (req, res) => {
     }
 
     if (req.file) {
+      // delete old image from cloudinary
+      if(post.coverImage && post.coverImage.public_id){
+        await cloudinary.uploader.destroy(post.coverImage.public_id);
+      }
+
       const streamUpload = () => {
         return new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
@@ -139,7 +147,10 @@ const updatePost = async (req, res) => {
       };
 
       const result = await streamUpload();
-      post.coverImage = result.secure_url;
+      post.coverImage = {
+        url: result.secure_url,
+        public_id: result.public_id,
+      };
     }
 
     if (title) post.title = title;
@@ -173,14 +184,16 @@ const deletePost = async (req, res) => {
 
     // 2. Check authorization
     if (post.author.toString() !== req.user.id && req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ success: false, message: "Not authorized to delete this post" });
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this post",
+      });
     }
 
     // 3. Delete image from Cloudinary (only if stored with public_id)
     if (post.coverImage && post.coverImage.public_id) {
       await cloudinary.uploader.destroy(post.coverImage.public_id);
+      console.log("Post deleted from cloudinary")
     }
 
     // 4. Delete post from DB
@@ -189,12 +202,10 @@ const deletePost = async (req, res) => {
     return res
       .status(200)
       .json({ success: true, message: "Post deleted successfully" });
-
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 
 module.exports = { createPost, getPost, getAllPost, updatePost, deletePost };
