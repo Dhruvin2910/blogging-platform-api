@@ -5,28 +5,7 @@ const commentSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   comment: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-  replies: [
-    {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-      comment: { type: String, required: true },
-      createdAt: { type: Date, default: Date.now },
-      replies: [
-        {
-          user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-          },
-          comment: { type: String, required: true },
-          createdAt: { type: Date, default: Date.now },
-        },
-      ],
-    },
-  ],
+  replies: [this],
 });
 
 const postSchema = new mongoose.Schema({
@@ -81,4 +60,5 @@ postSchema.pre("validate", async function (next) {
 });
 
 const PostModel = mongoose.model("Post", postSchema);
-module.exports = PostModel;
+const CommentModel = mongoose.model("Comment", commentSchema);
+module.exports = { PostModel, CommentModel };
