@@ -2,6 +2,27 @@ const UserModel = require("../Models/User");
 const cloudinary = require("../Config/cloudinary");
 const streamifier = require("streamifier");
 
+const getProfile = async (req, res) =>{
+    try{
+        const userId = req.user.id;
+
+        if(!userId){
+            return res.status(401).json({ success:false, message:"Unauthorized user or token expired" });
+        }
+        
+        const user = await UserModel.findById(userId).select('-password -role -__v');
+        if(!user){
+            return res.status(404).json({ success:false, message:"User not found" });
+        }
+
+        return res.status(200).json({ success:true, user });
+
+    }catch(error){
+        console.error("Get Profile Error: ", error);
+        return res.status(500).json({success:false, message:"Internal server error"});
+    }
+}
+
 const updateProfile = async (req, res) => {
     try{
         const userId = req.user.id;
@@ -88,4 +109,4 @@ const uploadAvatar = async (req, res) => {
     }
 }
 
-module.exports = { updateProfile, uploadAvatar };
+module.exports = {  getProfile, updateProfile, uploadAvatar };
