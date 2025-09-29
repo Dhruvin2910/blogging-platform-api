@@ -1,4 +1,5 @@
-const PostModel = require("../Models/Post");
+const { PostModel } = require("../Models/Post");
+const UserModel = require("../Models/User");
 const cloudinary = require("../Config/cloudinary");
 const streamifier = require("streamifier");
 
@@ -57,6 +58,36 @@ const createPost = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// get post for specific user
+const getUserPost = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await UserModel.findById(userId);
+
+     if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    const posts = await PostModel.find({ author: userId })
+      .sort({ createdAt: -1 })
+      .populate("author", "name avatar")
+      .populate("comments.user", "name avatar");
+
+    if (!posts) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
+    }
+
+    res.status(200).json({ success: true, posts });
+  } catch (err) {
+    console.log("GetUserPost Err: ", err);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
@@ -129,7 +160,7 @@ const updatePost = async (req, res) => {
 
     if (req.file) {
       // delete old image from cloudinary
-      if(post.coverImage && post.coverImage.public_id){
+      if (post.coverImage && post.coverImage.public_id) {
         await cloudinary.uploader.destroy(post.coverImage.public_id);
       }
 
@@ -193,7 +224,7 @@ const deletePost = async (req, res) => {
     // 3. Delete image from Cloudinary (only if stored with public_id)
     if (post.coverImage && post.coverImage.public_id) {
       await cloudinary.uploader.destroy(post.coverImage.public_id);
-      console.log("Post deleted from cloudinary")
+      console.log("Post deleted from cloudinary");
     }
 
     // 4. Delete post from DB
@@ -208,4 +239,4 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getPost, getAllPost, updatePost, deletePost };
+module.exports = { createPost, getPost, getUserPost, getAllPost, updatePost, deletePost };

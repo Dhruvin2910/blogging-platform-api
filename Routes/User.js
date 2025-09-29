@@ -16,4 +16,4 @@ router.get("/profile", ensureAuthenticated, getProfile);
 router.put("/profile", ensureAuthenticated, userValidation, updateProfile);
 router.post("/profile/avatar", ensureAuthenticated, upload.single("avatar"), uploadAvatar);
 
-module.exports = router;
+module.exports = router; 
