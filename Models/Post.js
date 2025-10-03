@@ -20,7 +20,7 @@ const postSchema = new mongoose.Schema({
   },
   tags: [String],
   category: { type: String },
-  likes: { type: Number, default: 0 },
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref:"User", default: [] }],
   comments: [commentSchema],
   status: {
     type: String,

@@ -5,6 +5,7 @@ const authRoute = require("./Routes/Auth");
 const userRoute = require("./Routes/User");
 const postRoute = require("./Routes/Post");
 const commentRoute = require("./Routes/Comment");
+const likeRoute = require("./Routes/Like");
 const cookieParser = require("cookie-parser");
 const PORT = process.env.PORT || 8000;
 
@@ -28,6 +29,7 @@ app.use("/auth", authRoute);
 app.use("/user", userRoute);
 app.use("/post", postRoute);
 app.use("/post/:postId/comments", commentRoute);
+app.use("/post", likeRoute);
 
 //for server testing
 app.get("/test", (req, res) => {

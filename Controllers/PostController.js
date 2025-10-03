@@ -67,7 +67,7 @@ const getUserPost = async (req, res) => {
     const userId = req.params.userId;
     const user = await UserModel.findById(userId);
 
-     if (!user) {
+    if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
@@ -108,6 +108,24 @@ const getPost = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+const getMyPost = async (req, res) => {
+  try {
+    const user = req.user;
+    const posts = await PostModel.find({ author:user.id })
+      .populate("author", "avatar")
+      .populate("comments.user", "avatar");
+
+
+    if(!posts){
+      return res.status(404).json({ success:false, message:"Post not found" });
+    }
+    res.status(200).json({ success:true, posts });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
@@ -239,4 +257,12 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getPost, getUserPost, getAllPost, updatePost, deletePost };
+module.exports = {
+  createPost,
+  getPost,
+  getMyPost,
+  getUserPost,
+  getAllPost,
+  updatePost,
+  deletePost,
+};
